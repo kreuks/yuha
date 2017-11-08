@@ -1,0 +1,7 @@
+name: yuha
+dependencies:
+- python=2.7.13
+- pip=9.0.1
+- pip:
+    - tensorflow
+    - keras==2.0.9

@@ -4,8 +4,10 @@ import numpy as np
 import os
 import random
 
+import keras.backend as K
 from PIL import Image
 from keras import Input
+from keras import objectives
 from keras.engine import Model
 from keras.layers import Dense
 from keras.models import load_model
@@ -23,6 +25,10 @@ class Models(object):
         self.top_layer = self.create_top_layer(len(self.label))
         self.top_layer._make_predict_function()
         self.top_layer._make_train_function()
+        with h5py.File(HDF5_PATH, 'r') as h5:
+            data, label = h5['features'], h5['label']
+            self.all_label = label[:]
+            self.data = data[:]
 
     @staticmethod
     def create_top_layer(num_label):
@@ -34,12 +40,26 @@ class Models(object):
         return top_layer
 
     @staticmethod
+    def create_similarity_layer(num_label):
+        input_prediction = Input(shape=(2408,))
+        x = Dense(128, activation='relu', name='fc2')(input_prediction)
+        prediction = Dense(num_label, activation='softmax', name='predictions')(x)
+        similarity_layer = Model(input_prediction, prediction)
+        similarity_layer.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+        return similarity_layer
+
+    @staticmethod
     def preprocess(image):
         img = image.resize(tuple([244, 244]))
         x = keras_image.img_to_array(img)
         x = np.expand_dims(x, axis=0)
         x /= 255.
         return x
+
+    def similarity(self, x, name):
+        data = self.data[np.where(self.all_label == name)]
+        data = np.average(data, axis=0)
+        return -K.eval(objectives.cosine_proximity(np.squeeze(x), data))
 
     def predict_intermediate_layer(self, image):
         image_np = self.preprocess(image)
@@ -49,7 +69,12 @@ class Models(object):
         intermediate_layer_output = self.predict_intermediate_layer(image)
         prediction = self.top_layer.predict(intermediate_layer_output)
         max = np.argmax(prediction)
-        return self.label[max], str(np.squeeze(prediction)[max])
+        name, score = self.label[max], np.squeeze(prediction)[max]
+        cosine_distance = self.similarity(intermediate_layer_output, name)
+        # TODO find another way to calculate similarity
+        # if score < 0.7 or cosine_distance < 0.9:
+        #     name = 'Unknwon'
+        return name, str(score)
 
     def registration_train(self, images, labels):
         if not os.path.exists(HDF5_PATH):
@@ -73,6 +98,8 @@ class Models(object):
                     label[-1:] = str(label_)
                 data = data[:]
                 label = label[:]
+                self.data = data
+                self.all_label = label
 
         self.label = list(self.label)
         num_label = len(self.label)
@@ -104,9 +131,6 @@ class Models(object):
         if label not in self.label:
             with open('models/label.txt', 'a') as file_:
                 file_.write('\n' + label)
-            # self.label.append(label)
-            # with open('models/label.json', 'w') as file_:
-            #     json.dump({k: v for k, v in enumerate(self.label)}, file_)
         self.registration_train(files, labels)
         with open(DONE_FILE_PATH, 'a') as file_:
             file_.write('\n')
