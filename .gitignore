@@ -1,0 +1,8 @@
+*.jpg
+*.JPG
+*.jpeg
+*.JPEG
+.idea/
+*.DS_STORE
+images/
+*.tar.gz

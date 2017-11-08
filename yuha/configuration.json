@@ -1,0 +1,13 @@
+{
+  "image": {
+    "resize": [244, 244],
+    "num_channel": 3,
+    "rescale": 255,
+    "batch_size": 16,
+    "class_mode": "categorical"
+  },
+  "train": {
+    "num_epoch": 97,
+    "model": "InceptionV3"
+  }
+}
