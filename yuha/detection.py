@@ -46,7 +46,7 @@ def detect_objects(image_np, sess_, detection_graph_):
 
     boxes, classes, scores = sort_by_score(np.squeeze(boxes), np.squeeze(classes).astype(np.int32), np.squeeze(scores))
     crop_box = (boxes[0][1] * im_width, boxes[0][0] * im_height, boxes[0][3] * im_width, boxes[0][2] * im_height)
-    # TODO add execption
+    # TODO add exception
     image = image.crop(crop_box)
 
     return image
