@@ -225,7 +225,7 @@ class Models(object):
                 x = GlobalMaxPooling2D()(x)
 
         model = ModelKeras(image_input, x, name='inception_v3')
-        model.compile(loss=triplet_loss,
+        model.compile(loss='categorical_crossentropy',
                       optimizer='rmsprop',
                       metrics=['accuracy'])
 

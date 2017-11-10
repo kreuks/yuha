@@ -25,16 +25,16 @@ class Pipelines(object):
 
             self.model = self.model(input_shape=(244, 244, 3), classes=4)
 
-            # callback_ = keras.callbacks.ModelCheckpoint(
-            #     'models/model_checkpoint.hdf5',
-            #     monitor='val_loss',
-            #     verbose=0,
-            #     save_best_only=True,
-            #     save_weights_only=False,
-            #     mode='auto',
-            #     period=1
-            # )
-            #
+            callback_ = keras.callbacks.ModelCheckpoint(
+                'models/model_checkpoint.hdf5',
+                monitor='val_loss',
+                verbose=0,
+                save_best_only=True,
+                save_weights_only=False,
+                mode='auto',
+                period=1
+            )
+
             # early_stopping = keras.callbacks.EarlyStopping(
             #     monitor='val_loss',
             #     min_delta=0.00001,
@@ -42,25 +42,25 @@ class Pipelines(object):
             #     verbose=0,
             #     mode='auto'
             # )
-            #
-            # tensorboard = keras.callbacks.TensorBoard(
-            #     log_dir='logs',
-            #     histogram_freq=0,
-            #     batch_size=self._config[Image.IMAGE][Image.BATCH_SIZE],
-            #     write_graph=True,
-            #     write_grads=True,
-            #     write_images=True,
-            #     embeddings_freq=0
-            # )
+
+            tensorboard = keras.callbacks.TensorBoard(
+                log_dir='logs',
+                histogram_freq=0,
+                batch_size=self._config[Image.IMAGE][Image.BATCH_SIZE],
+                write_graph=True,
+                write_grads=True,
+                write_images=True,
+                embeddings_freq=0
+            )
 
             self.model.fit_generator(
                 train,
                 steps_per_epoch=self._config[Image.IMAGE][Image.BATCH_SIZE],
                 epochs=self.num_epoch,
                 validation_data=test,
-                validation_steps=64
-                # use_multiprocessing=True
-                # callbacks=[callback_, tensorboard, early_stopping]
+                validation_steps=64,
+                use_multiprocessing=True,
+                callbacks=[callback_, tensorboard]
             )
 
             self.model.save(MODEL_PATH)
