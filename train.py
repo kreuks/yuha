@@ -23,7 +23,7 @@ class Pipelines(object):
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(coord=coord)
 
-            self.model = self.model(input_shape=(244, 244, 3), classes=4)
+            self.model = self.model(input_shape=(224, 224, 3), classes=530)
 
             callback_ = keras.callbacks.ModelCheckpoint(
                 'models/model_checkpoint.hdf5',
